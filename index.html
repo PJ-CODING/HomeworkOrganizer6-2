@@ -376,3 +376,86 @@
 </html>
 
 <script> // Save data when user types document.querySelectorAll('.field').forEach(field => { const key = field.id; // use the element's ID as the storage key // Load saved value on page load const saved = localStorage.getItem(key); if (saved !== null) { field.value = saved; } // Save whenever the user types field.addEventListener('input', () => { localStorage.setItem(key, field.value); }); }); </script>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Visitor Tracker (embed)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* Minimal styles so embedding is unobtrusive */
+    .visitor-tracker { display:none; }
+  </style>
+</head>
+<body>
+  <!-- This element is optional; the script runs automatically -->
+  <div class="visitor-tracker" id="visitor-tracker">tracking</div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+  /*
+    INSTRUCTIONS:
+    1. Create a Firebase project at https://console.firebase.google.com/
+    2. Enable Realtime Database and set rules for development (later tighten them).
+    3. Replace the firebaseConfig object below with your project's config.
+    4. Embed this entire file (or the script portion) into pages you control.
+  */
+
+  // ====== Replace with your Firebase config ======
+  const firebaseConfig = {
+    apiKey: "REPLACE_API_KEY",
+    authDomain: "REPLACE_PROJECT.firebaseapp.com",
+    databaseURL: "https://REPLACE_PROJECT-default-rtdb.firebaseio.com",
+    projectId: "REPLACE_PROJECT",
+    storageBucket: "REPLACE_PROJECT.appspot.com",
+    messagingSenderId: "REPLACE_SENDER_ID",
+    appId: "REPLACE_APP_ID"
+  };
+  // ==============================================
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  (function(){
+    // Use hostname as site identifier by default; override by setting window.TRACKER_SITE_NAME
+    const siteName = (window.TRACKER_SITE_NAME && String(window.TRACKER_SITE_NAME).trim()) || window.location.hostname;
+    // Create a unique visitor id for this page instance
+    const visitorId = 'v_' + Math.random().toString(36).slice(2, 10);
+
+    // Reference for this site's visitors
+    const visitorsRef = db.ref('sites/' + encodeURIComponent(siteName) + '/visitors');
+
+    // Add this visitor with a timestamp and optional metadata
+    const myRef = visitorsRef.child(visitorId);
+    myRef.set({
+      ts: firebase.database.ServerValue.TIMESTAMP,
+      ua: navigator.userAgent || null,
+      url: window.location.href
+    }).catch(console.error);
+
+    // Ensure removal on disconnect
+    myRef.onDisconnect().remove();
+
+    // Optional: update timestamp periodically so presence stays fresh
+    const heartbeat = setInterval(() => {
+      myRef.update({ ts: firebase.database.ServerValue.TIMESTAMP }).catch(()=>{});
+    }, 25000);
+
+    // Clean up if page unloads
+    window.addEventListener('beforeunload', () => {
+      try { myRef.remove(); } catch(e){}
+      clearInterval(heartbeat);
+    });
+
+    // Expose a small API if embedding site wants to control behavior
+    window.__VisitorTracker = {
+      siteName, visitorId, remove: () => myRef.remove()
+    };
+  })();
+  </script>
+</body>
+</html>
