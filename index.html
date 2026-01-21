@@ -374,3 +374,5 @@
 
 </body>
 </html>
+
+<script> // Save data when user types document.querySelectorAll('.field').forEach(field => { const key = field.id; // use the element's ID as the storage key // Load saved value on page load const saved = localStorage.getItem(key); if (saved !== null) { field.value = saved; } // Save whenever the user types field.addEventListener('input', () => { localStorage.setItem(key, field.value); }); }); </script>
