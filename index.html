@@ -1,87 +1,98 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Homework Organizer — Collapsible Sections</title>
+<title>Homework Organizer</title>
 <style>
   :root{
-    --bg:#f4f4f4;
-    --card:#fff;
+    --bg:#f4f6f8;
+    --card:#ffffff;
     --accent:#2b8cff;
     --muted:#6b7280;
-    --radius:8px;
+    --radius:10px;
   }
   *{box-sizing:border-box}
   body{
     margin:0;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     background:var(--bg);
-    padding:20px;
-    color:#111;
-  }
-  h1{text-align:center;margin:6px 0 18px}
-  .section{
-    background:var(--card);
-    border-radius:var(--radius);
-    box-shadow:0 2px 6px rgba(0,0,0,0.08);
-    margin:12px 0;
-    overflow:hidden;
+    color:#111827;
+    padding:28px;
   }
 
-  /* header (clickable) */
-  .section .header{
+  header{max-width:900px;margin:0 auto 18px}
+  h1{margin:0 0 6px;font-size:1.6rem}
+  p.lead{margin:0;color:var(--muted);font-size:0.95rem}
+
+  .container{max-width:900px;margin:18px auto 60px}
+
+  .accordion{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:0 6px 18px rgba(15,23,42,0.06);
+    overflow:hidden;
+    margin-bottom:14px;
+  }
+
+  .accordion .summary{
     display:flex;
     align-items:center;
     justify-content:space-between;
     gap:12px;
-    padding:14px 16px;
+    padding:14px 18px;
     cursor:pointer;
     user-select:none;
   }
-  .section .header .left{display:flex;gap:12px;align-items:center}
+
+  .summary-left{display:flex;align-items:center;gap:12px}
   .dot{
-    width:14px;height:14px;border-radius:4px;display:inline-block;
+    width:14px;height:14px;border-radius:4px;
+    display:inline-block;
   }
   .dot.ixl{background:#60a5fa}
   .dot.weekly{background:#34d399}
   .dot.workbook{background:#fb923c}
   .dot.spiral{background:#facc15}
 
-  .title{font-weight:700}
-  .subtitle{color:var(--muted);font-size:0.92rem}
+  .title{font-weight:600}
+  .meta{color:var(--muted);font-size:0.9rem}
 
   .chev{
     width:36px;height:36px;border-radius:8px;display:grid;place-items:center;
-    transition:transform .22s ease, background .12s;
-    color:var(--muted);
+    transition:transform .25s ease, background .15s;
   }
-  .chev svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none}
+  .chev svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
 
-  /* collapsible content */
-  .details{
-    padding:0 16px 16px 16px;
-    border-top:1px solid rgba(0,0,0,0.04);
+  .content{
+    padding:0 18px 18px 18px;
+    border-top:1px solid rgba(15,23,42,0.04);
     max-height:0;
     overflow:hidden;
     transition:max-height .28s cubic-bezier(.2,.9,.2,1), padding .18s;
   }
-  .details.open{padding:14px 16px 16px 16px}
+
+  .content.open{padding:14px 18px 18px 18px}
 
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
-  label{display:block;font-weight:600;margin-bottom:6px;font-size:0.92rem}
-  input[type="text"], input[type="date"], textarea{
-    width:100%;padding:9px;border-radius:8px;border:1px solid #e2e6ea;background:#fff;font-size:0.95rem;
+  label{display:block;font-weight:600;font-size:0.9rem;margin-bottom:6px}
+  input[type="text"], input[type="date"], textarea, select{
+    width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ee;background:#fff;
+    font-size:0.95rem;color:#111827;
   }
-  textarea{min-height:70px;resize:vertical}
-  .full{grid-column:1 / -1}
+  textarea{resize:vertical;min-height:70px}
 
+  .full{grid-column:1 / -1}
   .actions{display:flex;gap:8px;align-items:center;margin-top:6px}
-  button.save{background:var(--accent);color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer}
+  button.save{
+    background:var(--accent);color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;
+  }
   button.clear{background:#eef2ff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;color:var(--accent)}
 
-  .section.open .chev{transform:rotate(180deg);background:rgba(43,140,255,0.06);color:var(--accent)}
+  /* rotate icon when open */
+  .accordion.open .chev{transform:rotate(180deg);background:rgba(43,140,255,0.06);color:var(--accent)}
 
+  /* responsive */
   @media (max-width:640px){
     .row{grid-template-columns:1fr}
   }
@@ -89,180 +100,277 @@
 </head>
 <body>
 
-<h1>Homework Organizer</h1>
+<header>
+  <h1>Homework Organizer</h1>
+  <p class="lead">Click a section to expand or collapse its details. Your entries are saved locally in your browser.</p>
+</header>
 
-<!-- IXL -->
-<section class="section" data-key="ixl">
-  <div class="header" role="button" aria-expanded="false">
-    <div class="left">
-      <span class="dot ixl" aria-hidden="true"></span>
-      <div>
-        <div class="title">IXL</div>
-        <div class="subtitle">Skill · Goal · Due</div>
+<div class="container">
+
+  <!-- Accordion template -->
+  <div class="accordion" data-key="ixl">
+    <div class="summary" role="button" aria-expanded="false">
+      <div class="summary-left">
+        <span class="dot ixl" aria-hidden="true"></span>
+        <div>
+          <div class="title">IXL</div>
+          <div class="meta">Skill, goal, due date</div>
+        </div>
+      </div>
+      <div class="chev" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
       </div>
     </div>
-    <div class="chev" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
+
+    <div class="content" aria-hidden="true">
+      <div class="row">
+        <div>
+          <label>Skill</label>
+          <input type="text" class="field" data-field="skill">
+        </div>
+        <div>
+          <label>Goal</label>
+          <input type="text" class="field" data-field="goal">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Due</label>
+          <input type="date" class="field" data-field="due">
+        </div>
+        <div>
+          <label>Time estimate</label>
+          <input type="text" class="field" data-field="estimate" placeholder="e.g., 20 minutes">
+        </div>
+      </div>
+      <div class="row">
+        <div class="full">
+          <label>Notes</label>
+          <textarea class="field" data-field="notes" placeholder="Hints, steps, or teacher comments"></textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="save">Save</button>
+        <button class="clear">Clear</button>
+      </div>
     </div>
   </div>
 
-  <div class="details" aria-hidden="true">
-    <div class="row">
-      <div>
-        <label for="ixl-skill">Skill</label>
-        <input id="ixl-skill" class="field" data-field="skill" type="text">
+  <div class="accordion" data-key="weekly">
+    <div class="summary" role="button" aria-expanded="false">
+      <div class="summary-left">
+        <span class="dot weekly" aria-hidden="true"></span>
+        <div>
+          <div class="title">Weekly Assignments</div>
+          <div class="meta">Assignment, class, steps</div>
+        </div>
       </div>
-      <div>
-        <label for="ixl-goal">Goal</label>
-        <input id="ixl-goal" class="field" data-field="goal" type="text">
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label for="ixl-due">Due</label>
-        <input id="ixl-due" class="field" data-field="due" type="date">
-      </div>
-      <div>
-        <label for="ixl-est">Time estimate</label>
-        <input id="ixl-est" class="field" data-field="estimate" type="text" placeholder="e.g., 20 minutes">
+      <div class="chev" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
       </div>
     </div>
-    <div class="row">
-      <div class="full">
-        <label for="ixl-notes">Notes</label>
-        <textarea id="ixl-notes" class="field" data-field="notes"></textarea>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="save">Save</button>
-      <button class="clear">Clear</button>
-    </div>
-  </div>
-</section>
 
-<!-- Weekly Assignments -->
-<section class="section" data-key="weekly">
-  <div class="header" role="button" aria-expanded="false">
-    <div class="left">
-      <span class="dot weekly" aria-hidden="true"></span>
-      <div>
-        <div class="title">Weekly Assignments</div>
-        <div class="subtitle">Assignment · Class · Due</div>
+    <div class="content" aria-hidden="true">
+      <div class="row">
+        <div>
+          <label>Assignment</label>
+          <input type="text" class="field" data-field="assignment">
+        </div>
+        <div>
+          <label>Class</label>
+          <input type="text" class="field" data-field="class">
+        </div>
       </div>
-    </div>
-    <div class="chev" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
-    </div>
-  </div>
-
-  <div class="details" aria-hidden="true">
-    <div class="row">
-      <div>
-        <label for="wk-assn">Assignment</label>
-        <input id="wk-assn" class="field" data-field="assignment" type="text">
+      <div class="row">
+        <div>
+          <label>Due</label>
+          <input type="date" class="field" data-field="due">
+        </div>
+        <div>
+          <label>Priority</label>
+          <select class="field" data-field="priority">
+            <option value="">Select</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
       </div>
-      <div>
-        <label for="wk-class">Class</label>
-        <input id="wk-class" class="field" data-field="class" type="text">
+      <div class="row">
+        <div class="full">
+          <label>Steps to complete</label>
+          <textarea class="field" data-field="steps"></textarea>
+        </div>
       </div>
-    </div>
-    <div class="row">
-      <div>
-        <label for="wk-due">Due</label>
-        <input id="wk-due" class="field" data-field="due" type="date">
+      <div class="actions">
+        <button class="save">Save</button>
+        <button class="clear">Clear</button>
       </div>
-      <div>
-        <label for="wk-prio">Priority</label>
-        <input id="wk-prio" class="field" data-field="priority" type="text" placeholder="High / Medium / Low">
-      </div>
-    </div>
-    <div class="row">
-      <div class="full">
-        <label for="wk-steps">Steps to Complete</label>
-        <textarea id="wk-steps" class="field" data-field="steps"></textarea>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="save">Save</button>
-      <button class="clear">Clear</button>
-    </div>
-  </div>
-</section>
-
-<!-- Workbook Pages -->
-<section class="section" data-key="workbook">
-  <div class="header" role="button" aria-expanded="false">
-    <div class="left">
-      <span class="dot workbook" aria-hidden="true"></span>
-      <div>
-        <div class="title">Workbook Pages</div>
-        <div class="subtitle">Subject · Pages · Due</div>
-      </div>
-    </div>
-    <div class="chev" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
     </div>
   </div>
 
-  <div class="details" aria-hidden="true">
-    <div class="row">
-      <div>
-        <label for="wb-subj">Subject</label>
-        <input id="wb-subj" class="field" data-field="subject" type="text">
+  <div class="accordion" data-key="workbook">
+    <div class="summary" role="button" aria-expanded="false">
+      <div class="summary-left">
+        <span class="dot workbook" aria-hidden="true"></span>
+        <div>
+          <div class="title">Workbook Pages</div>
+          <div class="meta">Subject and page numbers</div>
+        </div>
       </div>
-      <div>
-        <label for="wb-pages">Pages</label>
-        <input id="wb-pages" class="field" data-field="pages" type="text" placeholder="e.g., 12-15">
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label for="wb-due">Due</label>
-        <input id="wb-due" class="field" data-field="due" type="date">
-      </div>
-      <div>
-        <label for="wb-notes">Notes</label>
-        <input id="wb-notes" class="field" data-field="notes" type="text">
+      <div class="chev" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
       </div>
     </div>
-    <div class="actions">
-      <button class="save">Save</button>
-      <button class="clear">Clear</button>
+
+    <div class="content" aria-hidden="true">
+      <div class="row">
+        <div>
+          <label>Subject</label>
+          <input type="text" class="field" data-field="subject">
+        </div>
+        <div>
+          <label>Pages</label>
+          <input type="text" class="field" data-field="pages" placeholder="e.g., 12-15">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Due</label>
+          <input type="date" class="field" data-field="due">
+        </div>
+        <div>
+          <label>Notes</label>
+          <input type="text" class="field" data-field="notes">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="save">Save</button>
+        <button class="clear">Clear</button>
+      </div>
     </div>
   </div>
-</section>
 
-<!-- Spiral Review -->
-<section class="section" data-key="spiral">
-  <div class="header" role="button" aria-expanded="false">
-    <div class="left">
-      <span class="dot spiral" aria-hidden="true"></span>
-      <div>
-        <div class="title">Spiral Review</div>
-        <div class="subtitle">Topic · Problems · Due</div>
+  <div class="accordion" data-key="spiral">
+    <div class="summary" role="button" aria-expanded="false">
+      <div class="summary-left">
+        <span class="dot spiral" aria-hidden="true"></span>
+        <div>
+          <div class="title">Spiral Review</div>
+          <div class="meta">Topic and practice problems</div>
+        </div>
+      </div>
+      <div class="chev" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
       </div>
     </div>
-    <div class="chev" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
+
+    <div class="content" aria-hidden="true">
+      <div class="row">
+        <div>
+          <label>Topic</label>
+          <input type="text" class="field" data-field="topic">
+        </div>
+        <div>
+          <label>Problems</label>
+          <input type="text" class="field" data-field="problems" placeholder="e.g., #1-5">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Due</label>
+          <input type="date" class="field" data-field="due">
+        </div>
+        <div>
+          <label>Notes</label>
+          <input type="text" class="field" data-field="notes">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="save">Save</button>
+        <button class="clear">Clear</button>
+      </div>
     </div>
   </div>
 
-  <div class="details" aria-hidden="true">
-    <div class="row">
-      <div>
-        <label for="sp-topic">Topic</label>
-        <input id="sp-topic" class="field" data-field="topic" type="text">
-      </div>
-      <div>
-        <label for="sp-prob">Problems</label>
-        <input id="sp-prob" class="field" data-field="problems" type="text" placeholder="e.g., #1-5">
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label for="sp-due">Due</label>
-        <input id="sp-due" class="field" data-field="due" type="date">
-      </div>
-      <div>
-        <label for="sp-notes">Notes</label>
-        
+</div>
+
+<script>
+  // Utility to get element children
+  function qs(selector, root=document) { return root.querySelector(selector) }
+  function qsa(selector, root=document) { return Array.from(root.querySelectorAll(selector)) }
+
+  // Initialize accordions
+  qsa('.accordion').forEach(acc => {
+    const summary = qs('.summary', acc)
+    const content = qs('.content', acc)
+    const key = acc.dataset.key
+
+    // restore saved open state
+    const openState = localStorage.getItem('hw_open_' + key)
+    if (openState === 'true') openAccordion(acc, content, summary)
+
+    // restore saved fields
+    qsa('.field', acc).forEach(f => {
+      const name = f.dataset.field
+      const saved = localStorage.getItem('hw_' + key + '_' + name)
+      if (saved !== null) f.value = saved
+    })
+
+    // toggle on click
+    summary.addEventListener('click', () => {
+      const isOpen = acc.classList.contains('open')
+      if (isOpen) closeAccordion(acc, content, summary)
+      else openAccordion(acc, content, summary)
+      localStorage.setItem('hw_open_' + key, !isOpen)
+    })
+
+    // save button
+    qs('.save', acc).addEventListener('click', () => {
+      qsa('.field', acc).forEach(f => {
+        const name = f.dataset.field
+        localStorage.setItem('hw_' + key + '_' + name, f.value)
+      })
+      // small visual feedback
+      qs('.save', acc).textContent = 'Saved'
+      setTimeout(()=> qs('.save', acc).textContent = 'Save', 900)
+    })
+
+    // clear button
+    qs('.clear', acc).addEventListener('click', () => {
+      qsa('.field', acc).forEach(f => {
+        const name = f.dataset.field
+        f.value = ''
+        localStorage.removeItem('hw_' + key + '_' + name)
+      })
+    })
+  })
+
+  function openAccordion(acc, content, summary){
+    acc.classList.add('open')
+    summary.setAttribute('aria-expanded','true')
+    content.classList.add('open')
+    content.style.maxHeight = content.scrollHeight + 'px'
+    content.setAttribute('aria-hidden','false')
+  }
+  function closeAccordion(acc, content, summary){
+    acc.classList.remove('open')
+    summary.setAttribute('aria-expanded','false')
+    content.style.maxHeight = 0
+    content.classList.remove('open')
+    content.setAttribute('aria-hidden','true')
+  }
+
+  // Close all on load then re-open those with saved state (fix for animation)
+  window.addEventListener('load', () => {
+    qsa('.content').forEach(c => c.style.maxHeight = c.classList.contains('open') ? c.scrollHeight + 'px' : 0)
+  })
+
+  // Adjust maxHeight on resize for open panels
+  window.addEventListener('resize', () => {
+    qsa('.accordion.open .content').forEach(c => c.style.maxHeight = c.scrollHeight + 'px')
+  })
+</script>
+
+</body>
+</html>
